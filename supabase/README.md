@@ -8,6 +8,7 @@ MedTruth は **Hirono と同じ Supabase プロジェクト** を共有できま
 |---------|------|
 | `medtruth_topics` | クイズのトピック（質問・解説・参考文献・正解 True/False） |
 | `medtruth_feedback` | トピックへの「役に立った」投票（👍/👎） |
+| `medtruth_verification_requests` | 「これってどうなの？」ユーザーからの検証リクエスト |
 
 ## 初回セットアップ
 
@@ -21,6 +22,10 @@ MedTruth は **Hirono と同じ Supabase プロジェクト** を共有できま
 
 4. **解説の自動生成APIからトピックを追加する場合**  
    `policy_insert_topics.sql` を実行し、`medtruth_topics` への INSERT を許可する。
+
+5. **「これってどうなの？」機能を使う場合**  
+   `schema_verification_requests.sql` を実行し、`medtruth_verification_requests` テーブルを作成する。  
+   画像アップロードを使う場合は、`storage_verification_photos.sql` を実行するか、Dashboard → Storage で `verification-photos` バケット（公開）を手動作成する。
 
 ## トピックの追加方法
 

@@ -2,9 +2,51 @@
 const user = useSupabaseUser()
 const supabase = useSupabaseClient()
 
+const authOpen = ref(false)
+const authMode = ref<'login' | 'signup'>('login')
+const authEmail = ref('')
+const authPassword = ref('')
+const authMessage = ref('')
+const authLoading = ref(false)
+
+async function handleAuth () {
+  authMessage.value = ''
+  authLoading.value = true
+  try {
+    if (authMode.value === 'login') {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: authEmail.value,
+        password: authPassword.value
+      })
+      if (error) throw error
+      authOpen.value = false
+      authEmail.value = ''
+      authPassword.value = ''
+    } else {
+      const { error } = await supabase.auth.signUp({
+        email: authEmail.value,
+        password: authPassword.value
+      })
+      if (error) throw error
+      authMessage.value = '確認メールを送りました。メール内のリンクで有効化してください。'
+    }
+  } catch (e: unknown) {
+    authMessage.value = (e as { message?: string })?.message ?? 'エラーが発生しました'
+  } finally {
+    authLoading.value = false
+  }
+}
+
 async function signOut () {
   await supabase.auth.signOut()
+  authOpen.value = false
 }
+
+function openAuth (mode: 'login' | 'signup') {
+  authMode.value = mode
+  authOpen.value = true
+}
+provide('openAuth', openAuth)
 </script>
 
 <template>
@@ -16,6 +58,7 @@ async function signOut () {
         </NuxtLink>
         <nav class="nav">
           <NuxtLink to="/" class="nav-link">トップ</NuxtLink>
+          <NuxtLink to="/ask" class="nav-link">これってどうなの？</NuxtLink>
           <NuxtLink to="/add-topic" class="nav-link">トピック追加</NuxtLink>
         </nav>
         <div class="auth-area">
@@ -24,10 +67,49 @@ async function signOut () {
             <button type="button" class="btn-header btn-outline" @click="signOut">ログアウト</button>
           </template>
           <template v-else>
-            <NuxtLink to="/login" class="btn-header btn-primary">ログイン</NuxtLink>
+            <button type="button" class="btn-header btn-primary" @click="authOpen = true">
+              ログイン
+            </button>
           </template>
         </div>
       </div>
+      <!-- ログイン/新規登録モーダル -->
+      <Teleport to="body">
+        <div v-if="authOpen" class="auth-overlay" @click.self="authOpen = false">
+          <div class="auth-card">
+            <div class="auth-card-header">
+              <h2>{{ authMode === 'login' ? 'ログイン' : '新規登録' }}</h2>
+              <button type="button" class="auth-close" aria-label="閉じる" @click="authOpen = false">×</button>
+            </div>
+            <form class="auth-form" @submit.prevent="handleAuth">
+              <input
+                v-model="authEmail"
+                type="email"
+                placeholder="メールアドレス"
+                required
+                class="auth-input"
+              />
+              <input
+                v-model="authPassword"
+                type="password"
+                placeholder="パスワード（6文字以上）"
+                required
+                minlength="6"
+                class="auth-input"
+              />
+              <p v-if="authMessage" class="auth-message">{{ authMessage }}</p>
+              <button type="submit" class="btn-auth" :disabled="authLoading">
+                {{ authLoading ? '送信中…' : (authMode === 'login' ? 'ログイン' : '登録') }}
+              </button>
+            </form>
+            <p class="auth-switch">
+              <button type="button" class="link-btn" @click="authMode = authMode === 'login' ? 'signup' : 'login'; authMessage = ''">
+                {{ authMode === 'login' ? 'アカウントを作成' : 'ログインに戻る' }}
+              </button>
+            </p>
+          </div>
+        </div>
+      </Teleport>
     </header>
 
     <main class="main">
@@ -37,7 +119,7 @@ async function signOut () {
     <footer class="site-footer">
       <div class="footer-inner">
         <NuxtLink to="/">トップ</NuxtLink>
-        <p class="footer-copy">© 2025 MedTruth</p>
+        <p class="footer-copy">© 2026 MedTruth</p>
       </div>
     </footer>
   </div>
@@ -110,6 +192,82 @@ async function signOut () {
 .btn-primary:hover { background: var(--hirono-blue-light); }
 .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border-subtle); }
 .btn-outline:hover { color: var(--hirono-blue); border-color: var(--hirono-blue-light); }
+
+/* Auth modal */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+.auth-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+.auth-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+.auth-card-header h2 { margin: 0; font-size: 1.25rem; color: var(--text-primary); }
+.auth-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 0.25rem;
+}
+.auth-close:hover { color: var(--text-primary); }
+.auth-form { display: flex; flex-direction: column; gap: 0.75rem; }
+.auth-input {
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: #f8fafc;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+.auth-input::placeholder { color: var(--text-muted); }
+.auth-input:focus {
+  outline: none;
+  border-color: var(--hirono-blue);
+  background: #fff;
+}
+.auth-message { margin: 0; font-size: 0.85rem; color: #b45309; }
+.btn-auth {
+  padding: 0.65rem;
+  border-radius: 8px;
+  border: none;
+  background: var(--hirono-blue);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.25rem;
+}
+.btn-auth:hover:not(:disabled) { background: var(--hirono-blue-light); opacity: 0.95; }
+.btn-auth:disabled { opacity: 0.6; cursor: not-allowed; }
+.auth-switch { margin: 0.75rem 0 0; text-align: center; font-size: 0.9rem; color: var(--text-muted); }
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--hirono-blue);
+  cursor: pointer;
+  text-decoration: underline;
+}
+.link-btn:hover { color: var(--hirono-blue-light); }
+
 .main { flex: 1; }
 .site-footer {
   border-top: 1px solid var(--border-subtle);

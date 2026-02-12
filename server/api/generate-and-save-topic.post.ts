@@ -1,8 +1,17 @@
 import { createClient } from '@supabase/supabase-js'
+import { serverSupabaseUser } from '#supabase/server'
 
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions'
 
 export default defineEventHandler(async (event) => {
+  const user = await serverSupabaseUser(event)
+  if (!user) {
+    throw createError({
+      statusCode: 401,
+      message: 'ログインが必要です。メールアドレスで新規登録またはログインしてください。'
+    })
+  }
+
   const body = await readBody<{ question: string; is_true: boolean; reference_url?: string }>(event)
   const { question, is_true, reference_url } = body ?? {}
 
