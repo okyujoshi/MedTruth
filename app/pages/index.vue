@@ -134,8 +134,15 @@ onMounted(() => {
       <template v-else-if="currentTopic">
         <!-- クイズカード -->
         <section class="card quiz-card">
-          <p class="card-label">この言い伝え、本当？</p>
-          <h2 class="question-title">{{ currentTopic.question }}</h2>
+          <div class="quiz-header">
+            <div>
+              <p class="card-label">この言い伝え、本当？</p>
+              <h2 class="question-title">{{ currentTopic.question }}</h2>
+            </div>
+            <button type="button" class="btn btn-next-top" @click="pickRandomTopic" aria-label="別のトピックを表示">
+              別のトピックを表示
+            </button>
+          </div>
 
           <div v-if="!showResult" class="buttons">
             <button type="button" class="btn btn-true" @click="submitAnswer(true)">True（正しい）</button>
@@ -208,6 +215,7 @@ onMounted(() => {
   text-align: center;
   padding: 2rem 1.5rem;
   border-bottom: 1px solid var(--border-subtle);
+  background: linear-gradient(135deg, rgba(45, 143, 191, 0.04) 0%, rgba(58, 155, 74, 0.03) 100%);
 }
 .page-header h1 {
   font-size: 1.6rem;
@@ -232,7 +240,7 @@ onMounted(() => {
   background: var(--bg-card);
   border-radius: 12px;
   border: 1px solid var(--border-subtle);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 2px 12px rgba(45, 143, 191, 0.04), 0 4px 20px -4px rgba(58, 155, 74, 0.03);
   overflow: hidden;
 }
 .card-loading,
@@ -262,6 +270,32 @@ onMounted(() => {
 
 .quiz-card {
   padding: 1.5rem 1.75rem;
+}
+.quiz-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+@media (min-width: 480px) {
+  .quiz-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+}
+.btn-next-top {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem;
+  background: var(--bg-page);
+  color: var(--hirono-blue);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.btn-next-top:hover {
+  background: var(--hirono-blue-dim);
+  border-color: var(--hirono-blue);
 }
 .card-label {
   margin: 0 0 0.5rem;

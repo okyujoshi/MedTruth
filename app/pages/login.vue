@@ -1,6 +1,7 @@
 <script setup lang="ts">
-// ログインはヘッダーのモーダルで行います。 /login にアクセスした場合はトップへリダイレクト
-await navigateTo('/', { replace: true })
+definePageMeta({
+  middleware: 'login-redirect'
+})
 </script>
 
 <template>

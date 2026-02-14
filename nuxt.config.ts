@@ -5,5 +5,11 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/supabase'],
   supabase: {
     redirect: false
+  },
+  runtimeConfig: {
+    public: {
+      donateKofiUrl: process.env.DONATE_KOFI_URL ?? '',
+      donatePaypalUrl: process.env.DONATE_PAYPAL_URL ?? ''
+    }
   }
 })
