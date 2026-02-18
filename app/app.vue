@@ -1,6 +1,9 @@
 <script setup lang="ts">
 const user = useSupabaseUser();
 const supabase = useSupabaseClient();
+const { public: config } = useRuntimeConfig();
+const adminEmail = (config.adminEmail as string) || '';
+const isAdmin = computed(() => adminEmail && (user.value?.email ?? '').toLowerCase() === adminEmail.toLowerCase());
 
 const authOpen = ref(false);
 const authMode = ref<"login" | "signup">("login");
@@ -63,10 +66,11 @@ provide("openAuth", openAuth);
           <NuxtLink to="/ask" class="nav-link">これってどうなの？</NuxtLink>
           <NuxtLink to="/add-topic" class="nav-link">トピック追加</NuxtLink>
           <NuxtLink to="/donate" class="nav-link">寄付</NuxtLink>
+          <NuxtLink v-if="isAdmin" to="/admin" class="nav-link">管理</NuxtLink>
         </nav>
         <div class="auth-area">
           <template v-if="user">
-            <span class="user-email">{{ user.email }}</span>
+            <span v-if="isAdmin" class="user-label">管理人</span>
             <button
               type="button"
               class="btn-header btn-outline"
@@ -248,12 +252,11 @@ provide("openAuth", openAuth);
   align-items: center;
   gap: 0.75rem;
 }
-.user-email {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.user-label {
+  font-size: 0.8rem;
+  color: var(--hirono-green);
+  font-weight: 600;
+  margin-right: 0.25rem;
 }
 .btn-header {
   padding: 0.45rem 0.9rem;

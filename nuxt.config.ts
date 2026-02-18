@@ -9,7 +9,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       donateKofiUrl: process.env.DONATE_KOFI_URL ?? '',
-      donatePaypalUrl: process.env.DONATE_PAYPAL_URL ?? ''
+      donatePaypalUrl: process.env.DONATE_PAYPAL_URL ?? '',
+      /** 管理画面にアクセスできる管理者メール（hutz@nifty.com のみ） */
+      adminEmail: 'hutz@nifty.com'
     }
   }
 })

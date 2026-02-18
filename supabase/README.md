@@ -23,7 +23,12 @@ MedTruth は **Hirono と同じ Supabase プロジェクト** を共有できま
 4. **解説の自動生成APIからトピックを追加する場合**  
    `policy_insert_topics.sql` を実行し、`medtruth_topics` への INSERT を許可する。
 
-5. **「これってどうなの？」機能を使う場合**  
+5. **管理画面でトピックの編集・削除をする場合**  
+   管理画面は hutz@nifty.com でログインした場合のみ利用可能。  
+   `.env` に `SUPABASE_SERVICE_KEY`（Supabase Dashboard → Settings → API の service_role key）を設定する。  
+   これにより RLS をバイパスして削除・更新が可能になる。
+
+6. **「これってどうなの？」機能を使う場合**  
    `schema_verification_requests.sql` を実行し、`medtruth_verification_requests` テーブルを作成する。  
    画像アップロードを使う場合は、`storage_verification_photos.sql` を実行するか、Dashboard → Storage で `verification-photos` バケット（公開）を手動作成する。
 
@@ -42,6 +47,11 @@ MedTruth は **Hirono と同じ Supabase プロジェクト** を共有できま
 2. **質問**（例: 〇〇は体に良い？）と **正解**（True / False）を入力。参考文献URLは任意。
 3. **「解説を自動生成してDBに保存」** を押す。OpenAI が解説文を生成し、そのまま DB に保存される。
 4. `.env` に `OPENAI_API_KEY=sk-...` を設定しておくこと。未設定の場合はエラーになる。
+
+**方法 D: 管理画面（hutz@nifty.com のみ）**
+
+1. hutz@nifty.com でログインし、ヘッダーの **管理** を開く。
+2. 新規追加・編集・削除をブラウザから行える。
 
 **方法 B: Table Editor**
 
